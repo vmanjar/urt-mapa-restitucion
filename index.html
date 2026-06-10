@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Colombia 3D Point-Cloud Topography</title>
+    <title>URT - Mapa de restitución</title>
     <!-- Nunito Sans Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Three.js CDN -->
@@ -168,6 +168,13 @@
             font-size: 0.75rem;
             color: #8a99ad;
             line-height: 1.5;
+        }
+
+        #nav-instructions {
+            max-height: 150px;
+            margin-top: 12px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.4s ease, margin-top 0.4s ease;
         }
 
         .footer-stats {
@@ -413,7 +420,8 @@
     <div class="ui-overlay">
         <header class="header">
             <h1>Mapa de la restitución</h1>
-            <p>Mapa interactivo de la Unidad de Restitución de Tierras (URT), con la gestión y resultados históricos de sus Direcciones Territoriales desde la vigencia de la Ley 1448 de 2011.<br><br><strong>Navegación (Móviles):</strong> Arrastre un dedo para rotar la vista o use dos dedos para desplazar el mapa. Pellizque con dos dedos para realizar zoom. Toque una Territorial para consultar sus métricas.</p>
+            <p>Mapa interactivo de la Unidad de Restitución de Tierras (URT), con la gestión y resultados históricos de sus Direcciones Territoriales desde la vigencia de la Ley 1448 de 2011.</p>
+            <p id="nav-instructions"><strong>Navegación (Móviles):</strong> Arrastre un dedo para rotar la vista o use dos dedos para desplazar el mapa. Pellizque con dos dedos para realizar zoom. Toque una Territorial para consultar sus métricas.</p>
         </header>
 
         <footer class="footer-stats">
