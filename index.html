@@ -166,12 +166,50 @@
             line-height: 1.5;
         }
 
-        #nav-instructions {
-            max-height: 150px;
+        .help-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
             margin-top: 12px;
-            overflow: hidden;
-            transition: max-height 0.4s ease, opacity 0.4s ease, margin-top 0.4s ease;
         }
+
+        .help-btn {
+            background: none;
+            border: 1px solid var(--accent-yellow);
+            color: var(--accent-yellow);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1px;
+        }
+
+        .help-btn:hover {
+            background: var(--accent-yellow);
+            color: var(--bg-color);
+        }
+
+        #nav-instructions {
+            color: var(--accent-yellow);
+            max-height: 150px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.4s ease;
+        }
+
+        #nav-instructions.hidden {
+            max-height: 0px;
+            opacity: 0;
+        }
+
+        .instr-mobile { display: none; }
+        .instr-desktop { display: inline; }
 
         .footer-stats {
             background: var(--panel-bg);
@@ -359,6 +397,9 @@
         }
 
         @media (max-width: 768px) {
+            .instr-mobile { display: inline; }
+            .instr-desktop { display: none; }
+            
             .ui-overlay {
                 padding: 16px;
             }
@@ -423,7 +464,15 @@
         <header class="header">
             <h1>Mapa de la restitución</h1>
             <p>Mapa interactivo de la Unidad de Restitución de Tierras (URT), con la gestión y resultados históricos de sus Direcciones Territoriales desde la vigencia de la Ley 1448 de 2011.</p>
-            <p id="nav-instructions"><strong>Navegación (Móviles):</strong> Arrastre un dedo para rotar la vista o use dos dedos para desplazar el mapa. Pellizque con dos dedos para realizar zoom. Toque una Territorial para consultar sus métricas.</p>
+            <div class="help-container">
+                <button class="help-btn" onclick="toggleInstructions()">
+                    <svg width="12" height="12" stroke-width="2.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor"><path d="M9 9c0-3.5 5.5-3.5 5.5 0 0 2.5-2.5 2-2.5 5M12 18.01l.01-.011" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
+                <p id="nav-instructions">
+                    <span class="instr-desktop"><strong>Navegación:</strong> Haga clic y arrastre para rotar la vista. Use el clic derecho para desplazar el mapa y la rueda del ratón para acercar o alejar. Haga clic en una Territorial para consultar sus métricas.</span>
+                    <span class="instr-mobile"><strong>Navegación:</strong> Arrastre un dedo para rotar la vista o use dos dedos para desplazar el mapa. Pellizque con dos dedos para realizar zoom. Toque una Territorial para consultar sus métricas.</span>
+                </p>
+            </div>
         </header>
 
         <footer class="footer-stats">
@@ -468,6 +517,18 @@
     </div>
 
     <script>
+        function toggleInstructions() {
+            const navEl = document.getElementById('nav-instructions');
+            if (navEl) navEl.classList.toggle('hidden');
+        }
+
+        function hideInstructions() {
+            const navEl = document.getElementById('nav-instructions');
+            if (navEl && !navEl.classList.contains('hidden')) {
+                navEl.classList.add('hidden');
+            }
+        }
+
         // --- 1. CORE GEOGRAPHIC DEFINITIONS ---
         const colombiaPolygon = [
             [-71.6, 12.45], [-71.3, 12.15], [-71.3, 11.8], [-72.3, 11.4], [-72.5, 10.3], 
@@ -662,9 +723,6 @@
         const centerLng = -74.0;
         const centerLat = 4.5;
         const sphereRadius = 9.5; 
-
-        // State flag tracking whether the user has interacted with any label
-        let hasInteracted = false; 
 
         function loadTerrainAssets() {
             let loaded = 0;
@@ -956,7 +1014,7 @@
             
             // Reverted back to 16,000 instances on mobile viewports
             const isMobile = window.innerWidth < 768;
-            const targetPointsCount = isMobile ? 16000 : 28000;
+            const targetPointsCount = isMobile ? 16000 : 36000;
             
             let current = 0;
             let attempts = 0;
@@ -989,7 +1047,7 @@
                         const hBase = getRealisticHeight(testLng, testLat);
                         
                         // Height-biased density curve to completely eliminate "naked" steep mountain slopes
-                        const altitudeBias = 0.40 + 0.60 * (hBase / 2.0);
+                        const altitudeBias = 0.15 + 0.85 * (hBase / 2.0);
                         if (Math.random() > altitudeBias) continue;
 
                         const noiseVal = fbm(testLng * 2.8, testLat * 2.8);
@@ -998,15 +1056,15 @@
                     } else if (terr === "NEIGHBOR") {
                         const hBase = getRealisticHeight(testLng, testLat);
                         
-                        const altitudeBias = 0.40 + 0.60 * (hBase / 2.0);
+                        const altitudeBias = 0.15 + 0.85 * (hBase / 2.0);
                         if (Math.random() > altitudeBias) continue;
 
                         const noiseVal = fbm(testLng * 2.8, testLat * 2.8);
                         y = hBase * (0.12 + 0.88 * noiseVal) * 1.45 * 0.80;
                         typeVal = 1.0;
                     } else {
-                        // Sparse Ocean logic (exactly 15% density)
-                        if (Math.random() > 0.15) continue; 
+                        // Sparse Ocean logic (exactly 7.5% density)
+                        if (Math.random() > 0.075) continue; 
                         y = -0.01; 
                         typeVal = 0.0;
                     }
@@ -1021,20 +1079,20 @@
                     
                     if (r > 128) {
                         // Height-biased density curve to completely eliminate "naked" steep mountain slopes
-                        const altitudeBias = 0.40 + 0.60 * (elevRaw / 255.0);
+                        const altitudeBias = 0.15 + 0.85 * (elevRaw / 255.0);
                         if (Math.random() > altitudeBias) continue;
 
                         y = (elevRaw / 255.0) * 1.5 * 0.80; 
                         typeVal = 2.0;
                     } else if (b > 128) {
-                        const altitudeBias = 0.40 + 0.60 * (elevRaw / 255.0);
+                        const altitudeBias = 0.15 + 0.85 * (elevRaw / 255.0);
                         if (Math.random() > altitudeBias) continue;
 
                         y = (elevRaw / 255.0) * 1.5 * 0.80; 
                         typeVal = 1.0;
                     } else {
-                        // Sparse Ocean Logic (Exactly 15% density)
-                        if (Math.random() > 0.15) continue; 
+                        // Sparse Ocean Logic (Exactly 7.5% density)
+                        if (Math.random() > 0.075) continue; 
                         y = -0.01; 
                         typeVal = 0.0;
                     }
@@ -1260,16 +1318,8 @@
                 });
             }, 2200);
 
-            // Hide the interaction instructions container smoothly on first label tap
-            if (!hasInteracted) {
-                hasInteracted = true;
-                const navEl = document.getElementById('nav-instructions');
-                if (navEl) {
-                    navEl.style.opacity = '0';
-                    navEl.style.maxHeight = '0px';
-                    navEl.style.marginTop = '0px';
-                }
-            }
+            // Hide instructions when interacting with a label
+            hideInstructions();
 
             const targetPos = new THREE.Vector3().copy(dept.worldPos);
             
@@ -1301,6 +1351,8 @@
                     lbl.style.zIndex = "";
                 });
             }, 1100);
+
+            hideInstructions();
 
             const defaultTarget = new THREE.Vector3(0, 0, 0);
             lerpCamera(controls.target, defaultTarget, 1.1); // Twice as fast zoom-out duration (1.1s)
